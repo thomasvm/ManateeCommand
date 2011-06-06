@@ -1,0 +1,15 @@
+﻿{
+    up: {
+        create_table: {
+            name: "categories",
+            timestamps: true,
+            columns: [
+                { name: "title", type: "string" },
+                { name: "description", type: "text" }
+            ]
+        }
+    },
+	down: {
+		drop_table: "categories"
+	}
+}
