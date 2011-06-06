@@ -18,6 +18,7 @@ namespace Manatee.Command
                 { "command=|c=", "Command, possible values can be 'list' or 'exec'. List is the default.", s => settings.ParseCommand(s) }, 
                 { "folder=|f=", "Migrations folder", s => settings.MigrationFolder = s }, 
                 { "con=", "Name of the connection", s => settings.Connection = s }, 
+                { "version=|v=", "Destination version", s => settings.GotoVersion(s) }, 
             };
 
             try
@@ -49,6 +50,8 @@ namespace Manatee.Command
         private static void DoManatee(InputParameters settings)
         {
             var migrator = new Migrator(settings.MigrationFolder, settings.Connection);
+
+            // List
             if(settings.Command == Command.List)
             {
                 Console.WriteLine("Current Version: {0}", migrator.CurrentVersion);
@@ -56,10 +59,18 @@ namespace Manatee.Command
                 foreach(var migration in migrator.Migrations)
                 {
                     Console.WriteLine("{0}: {1}", ++counter, migration.Key);
-                    Console.WriteLine("--------------");
-                    Console.WriteLine(migration.Value);
-                    Console.WriteLine();
                 }
+                return;
+            }
+
+            // Execute
+            if(settings.Command == Command.Goto)
+            {
+                var destinationVersion = settings.DesitinationVersion ?? migrator.Migrations.Count;
+                Console.WriteLine("Current Version: {0}", migrator.CurrentVersion);
+                Console.WriteLine("Going to Version: {0}", destinationVersion);
+
+                migrator.Migrate(destinationVersion);
             }
         }
     }
