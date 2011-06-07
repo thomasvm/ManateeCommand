@@ -354,7 +354,7 @@ namespace Manatee
                 //add some timestamps?
                 if (op.create_table.timestamps != null)
                 {
-                    columns += "\n    , CreatedOn datetime DEFAULT getdate() NOT NULL\n    , UpdatedOn datetime DEFAULT getdate() NOT NULL";
+                    columns += "\n    , CreatedBy nvarchar(250) NOT NULL\n    , CreatedOn datetime DEFAULT getdate() NOT NULL\n    , ModifiedBy nvarchar(250) NOT NULL\n    , ModifiedOn datetime DEFAULT getdate() NOT NULL";
                 }
 
                 //make sure we have a PK :)
@@ -398,6 +398,14 @@ namespace Manatee
                 result = string.Format(
                     "ALTER TABLE [{0}] ALTER COLUMN {1}", op.change_column.table, StripLeadingComma(BuildColumnList(op.change_column.columns)));
                 //ADD INDEX
+            }
+            else if (op.foreign_key != null)
+            { 
+
+            }
+            else if (op.drop_constraint != null)
+            {
+                result = string.Format("ALTER TABLE [{0}] DROP CONSTRAINT [{0}]", op.drop_constraint.name, op.drop_constraint.table);
             }
             else if (op.add_index != null)
             {
