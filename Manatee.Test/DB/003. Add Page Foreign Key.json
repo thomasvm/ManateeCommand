@@ -1,0 +1,18 @@
+﻿{
+	up: {
+		foreign_key: {
+			name: "fk_page_to_category",
+			from: {
+				table: "pages",
+				columns: [ "categoryid" ]
+			},
+			to: {
+				table: "categories",
+				columns: [ "categorid" ]
+			}
+		}
+	},
+	down: {
+		drop_constraint: "fk_page_to_category"
+	}
+}
