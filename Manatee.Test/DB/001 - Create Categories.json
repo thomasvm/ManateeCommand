@@ -4,6 +4,7 @@
             name: "categories",
             timestamps: true,
             columns: [
+				{ name: "categoryid", type: "pk"},
                 { name: "title", type: "string" },
                 { name: "description", type: "text" }
             ]

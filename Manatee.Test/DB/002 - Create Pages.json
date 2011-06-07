@@ -1,0 +1,17 @@
+﻿{
+	up: {
+		create_table: {
+			name: "pages",
+			timestamps: true,
+			columns: [
+				{ name: "pageid", type: "pk" },
+				{ name: "name", type: "string" },
+				{ name: "description", type: "text" },
+				{ name: "categoryid", type: "int" }
+			]
+		}
+	},
+	down: {
+		drop_table: "pages"
+	}
+}
