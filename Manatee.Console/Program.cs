@@ -15,10 +15,10 @@ namespace Manatee.Command
             var options = new OptionSet
             {
                 { "help|h", "Show Help", s => settings.ShowHelp = true }, 
-                { "command=|c=", "Command, possible values can be 'list' or 'exec'. List is the default.", s => settings.ParseCommand(s) }, 
+                { "command=|c=", "Command, possible values can be 'list' or 'goto'. List is the default.", s => settings.ParseCommand(s) }, 
                 { "folder=|f=", "Migrations folder", s => settings.MigrationFolder = s }, 
                 { "con=", "Name of the connection", s => settings.Connection = s }, 
-                { "version=|v=", "Destination version", s => settings.GotoVersion(s) }, 
+                { "version=|v=", "Destination version, must be a number or 'last'", s => settings.GotoVersion(s) }, 
             };
 
             try
