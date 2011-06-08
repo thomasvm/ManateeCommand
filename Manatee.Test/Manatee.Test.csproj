@@ -61,7 +61,7 @@
     <Content Include="DB\002 - Create Pages.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="DB\003. Add Page Foreign Key.json">
+    <Content Include="DB\003 - Add Page Foreign Key.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
