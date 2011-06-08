@@ -8,11 +8,14 @@
 			},
 			to: {
 				table: "categories",
-				columns: [ "categorid" ]
+				columns: [ "categoryid" ]
 			}
 		}
 	},
 	down: {
-		drop_constraint: "fk_page_to_category"
+		drop_constraint: {
+			table: "pages",
+			name: "fk_page_to_category"
+		}
 	}
 }

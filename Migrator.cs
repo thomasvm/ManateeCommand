@@ -400,12 +400,21 @@ namespace Manatee
                 //ADD INDEX
             }
             else if (op.foreign_key != null)
-            { 
+            {
+                dynamic foreignKey = op.foreign_key;
 
+                string fromColumns = string.Join(", ", foreignKey.from.columns);
+                string toColumns = string.Join(", ", foreignKey.to.columns);
+                
+                result = string.Format(
+                    "ALTER TABLE [{0}] ADD CONSTRAINT [{1}] FOREIGN KEY ({2}) REFERENCES [{3}]({4})", 
+                    foreignKey.from.table, foreignKey.name, fromColumns, 
+                    foreignKey.to.table, toColumns
+                    );
             }
             else if (op.drop_constraint != null)
             {
-                result = string.Format("ALTER TABLE [{0}] DROP CONSTRAINT [{0}]", op.drop_constraint.name, op.drop_constraint.table);
+                result = string.Format("ALTER TABLE [{0}] DROP CONSTRAINT [{1}]", op.drop_constraint.table, op.drop_constraint.name);
             }
             else if (op.add_index != null)
             {

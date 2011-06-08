@@ -61,7 +61,9 @@
     <Content Include="DB\002 - Create Pages.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="DB\003. Add Page Foreign Key.json" />
+    <Content Include="DB\003. Add Page Foreign Key.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
