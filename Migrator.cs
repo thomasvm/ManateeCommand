@@ -341,6 +341,17 @@ namespace Manatee
                 return "-- no DOWN specified. If this is a CREATE table or ADD COLUMN - it will be generated for you";
             }
 
+            if(op is Array)
+            {
+                var cb = new System.Text.StringBuilder();
+
+                foreach(dynamic item in op)
+                {
+                    cb.AppendLine(GetCommand(item));
+                    cb.AppendLine("GO");
+                }
+                return cb.ToString();
+            }
             if (op.GetType() == typeof(string))
             {
                 return SetColumnType(op).Replace("{", "").Replace("}", "");
