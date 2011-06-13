@@ -203,10 +203,10 @@ namespace Manatee
                     
                     if (migration.down == null) //(!DynamicExtentions.HasProperty(migration, "down"))
                     {
-                        var cmd = ReadMinds(migration);
-                        if (!String.IsNullOrEmpty(cmd))
+                        foreach(var cmd in ReadMinds(migration.up))
                         {
-                            _db.Execute(cmd);
+                            if (!string.IsNullOrEmpty(cmd))
+                                _db.Execute(cmd);
                         }
                     }
                     else
@@ -363,7 +363,7 @@ namespace Manatee
                 var columns = BuildColumnList(op.create_table.columns);
 
                 //add some timestamps?
-                if (op.create_table.timestamps != null)
+                if (op.create_table.timestamps != null && op.create_table.timestamps != false)
                 {
                     columns += "\n    , CreatedBy nvarchar(250) NOT NULL\n    , CreatedOn datetime DEFAULT getdate() NOT NULL\n    , ModifiedBy nvarchar(250) NOT NULL\n    , ModifiedOn datetime DEFAULT getdate() NOT NULL";
                 }
@@ -493,22 +493,39 @@ namespace Manatee
         /// <summary>
         /// If a "down" isn't declared, this handy function will try and figure it out for you
         /// </summary>
-        private static string ReadMinds(dynamic migration)
+        private static IEnumerable<string> ReadMinds(dynamic migration)
+        {
+            if (migration is IEnumerable)
+            {
+                foreach (var item in migration.Reverse())
+                    yield return ReadSingleMind(item);
+            }
+            else
+            {
+                yield return ReadSingleMind(migration);
+            }
+        }
+
+        private static string ReadSingleMind(dynamic op)
         {
             //CREATE
-            if (migration.up.create_table != null)
+            if (op.create_table != null)
             {
-                return string.Format("DROP TABLE [{0}]", migration.up.create_table.name);
+                return string.Format("DROP TABLE [{0}]", op.up.create_table.name);
                 //DROP COLUMN
             }
-            else if (migration.up.add_column != null)
+            else if (op.add_column != null)
             {
-                return string.Format("ALTER TABLE [{0}] DROP COLUMN {1}", migration.up.add_column, migration.up.add_column.columns[0].name);
+                return string.Format("ALTER TABLE [{0}] DROP COLUMN {1}", op.up.add_column, op.up.add_column.columns[0].name);
             }
-            else if (migration.up.add_index != null)
+            else if (op.add_index != null)
             {
                 // DROP INDEX
-                return string.Format("DROP INDEX {0}.{1}", migration.up.add_index.table_name, CreateIndexName(migration.up.add_index));
+                return string.Format("DROP INDEX {0}.{1}", op.up.add_index.table_name, CreateIndexName(op.up.add_index));
+            }
+            else if (op.add_foreign_key != null)
+            {
+                return string.Format("ALTER TABLE [{0}] DROP CONSTRAINT [{1}]", op.foreign_key.from.table, op.foreign_key.name);
             }
             return "";
         }
