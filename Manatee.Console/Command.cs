@@ -8,6 +8,7 @@ namespace Manatee.Command
     public enum Command
     {
         List,
-        Goto
+        Goto,
+        Derive
     }
 }

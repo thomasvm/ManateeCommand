@@ -51,6 +51,10 @@
     </Compile>
     <Compile Include="Command.cs" />
     <Compile Include="InputParameters.cs" />
+    <Compile Include="MigrationDeriver.cs" />
+    <Compile Include="Models\Column.cs" />
+    <Compile Include="Models\PetaPoco.cs" />
+    <Compile Include="Models\Table.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -59,6 +63,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

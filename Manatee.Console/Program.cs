@@ -15,7 +15,7 @@ namespace Manatee.Command
             var options = new OptionSet
             {
                 { "help|h", "Show Help", s => settings.ShowHelp = true }, 
-                { "command=|c=", "Command, possible values can be 'list' or 'goto'. List is the default.", s => settings.ParseCommand(s) }, 
+                { "command=|c=", "Command, possible values can be 'list', 'goto' or 'derive'. List is the default.", s => settings.ParseCommand(s) }, 
                 { "folder=|f=", "Migrations folder", s => settings.MigrationFolder = s }, 
                 { "con=", "Name of the connection", s => settings.Connection = s }, 
                 { "version=|v=", "Destination version, must be a number or 'last'", s => settings.GotoVersion(s) }, 
@@ -49,6 +49,12 @@ namespace Manatee.Command
 
         private static void DoManatee(InputParameters settings)
         {
+            if(settings.Command == Command.Derive)
+            {
+                var deriver = new MigrationDeriver(settings.MigrationFolder, settings.Connection);
+                deriver.DoDerive();
+            }
+
             var migrator = new Migrator(settings.MigrationFolder, settings.Connection);
 
             // List
