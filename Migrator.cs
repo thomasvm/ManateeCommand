@@ -185,13 +185,12 @@ namespace Manatee
                 {
                     //grab the next version - we start the loop with the current
                     var migration = Migrations.Values.ElementAt(i);
-                    _db.Execute(GetCommand(migration.up));
+
+                    foreach(string command in GetCommands(migration.up))
+                        _db.Execute(command);
 
                     //increment the version
                     _db.Execute("UPDATE SchemaInfo SET Version = Version +1");
-
-                    //run any execution calls that are part of "up"
-                    CheckForExecute(_db, migration.up);
                 }
             }
             else
@@ -212,9 +211,8 @@ namespace Manatee
                     }
                     else
                     {
-                        _db.Execute(GetCommand(migration.down));
-                        //run any execution calls that are part of "up"
-                        CheckForExecute(_db, migration.down);
+                        foreach (string command in GetCommands(migration.down))
+                            _db.Execute(command);
                     }
                     //decrement the version
                     _db.Execute("UPDATE SchemaInfo SET Version = Version - 1");
@@ -321,6 +319,19 @@ namespace Manatee
             return sb.ToString();
         }
 
+        private static IEnumerable<string> GetCommands(dynamic op)
+        {
+            if (op is IEnumerable)
+            {
+                foreach (dynamic opItem in op)
+                    yield return GetCommand(opItem);
+
+                yield break;
+            }
+
+            yield return GetCommand(op);
+        }
+
         /// <summary>
         /// This is the main "builder" of the DDL SQL and it's tuned for SQL CE. 
         /// The idea is that you build your app using SQL CE, then upgrade it to SQL Server when you need to
@@ -340,18 +351,7 @@ namespace Manatee
             {
                 return "-- no DOWN specified. If this is a CREATE table or ADD COLUMN - it will be generated for you";
             }
-
-            if(op is Array)
-            {
-                var cb = new System.Text.StringBuilder();
-
-                foreach(dynamic item in op)
-                {
-                    cb.AppendLine(GetCommand(item));
-                    cb.AppendLine("GO");
-                }
-                return cb.ToString();
-            }
+            
             if (op.GetType() == typeof(string))
             {
                 return SetColumnType(op).Replace("{", "").Replace("}", "");
@@ -440,6 +440,10 @@ namespace Manatee
             {
                 result = string.Format("DROP INDEX {0}.{1}", op.remove_index.table_name, CreateIndexName(op.remove_index));
             }
+            else if (op.execute != null)
+            {
+                result = op.execute;
+            }
 
             return result;
         }
@@ -483,21 +487,6 @@ namespace Manatee
             {
                 db.Execute("CREATE TABLE SchemaInfo (Version INT)");
                 db.Execute("INSERT INTO SchemaInfo(Version) VALUES(0)");
-            }
-        }
-
-        private static void CheckForExecute(Database db, dynamic op)
-        {
-            //the only thing you need to set is right here...
-            if (op.GetType() != typeof(string))
-            {
-                if (op.execute != null)
-                {
-                    if (!String.IsNullOrEmpty(op.execute))
-                    {
-                        db.Execute(op.execute);
-                    }
-                }
             }
         }
 

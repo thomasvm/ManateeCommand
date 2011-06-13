@@ -1,29 +1,33 @@
 ﻿{
 	up : [
-		{ create_table: {
-			name: "subcategories",
-			timestamps: false,
-			columns: [
-				{ name: "subcategoryid", type: "pk" },
-				{ name: "name", type: "string" },				
-				{ name: "categoryid", type: "int" }				
-			]
+		{ 
+			create_table: {
+				name: "subcategories",
+				timestamps: false,
+				columns: [
+					{ name: "subcategoryid", type: "pk" },
+					{ name: "name", type: "string" },				
+					{ name: "categoryid", type: "int" }				
+				]
 			}
 		},
-		{ foreign_key: {
-			from: {
-				table: "subcategories",
-				columns: [ "categoryid"]
-				},
-			to: {
-				table: "categories",
-				columns: [ "categoryid" ]
-			}
+		{ 
+			foreign_key: {
+				name: "fk_subcategories_to_categories",
+				from: {
+					table: "subcategories",
+					columns: [ "categoryid"]
+					},
+				to: {
+					table: "categories",
+					columns: [ "categoryid" ]
+				}
 			}
 		}
 	],
 	down: [
-		{ drop_constraint: {
+		{ 
+			drop_constraint: {
 				table: "subcategories",
 				name: "fk_subcategories_to_categories"
 			}
