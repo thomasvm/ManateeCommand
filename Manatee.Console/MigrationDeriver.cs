@@ -9,6 +9,8 @@ namespace Manatee.Command
 {
     public class MigrationDeriver
     {
+        
+
         protected Database Db { get; set; }
 
         protected string Folder { get; set; }
@@ -25,22 +27,27 @@ namespace Manatee.Command
 
         public void DoDerive()
         {
-            var tables =
-                Db.Fetch<Table>("SELECT ObjectId= object_id, Name = name FROM sys.tables WHERE name <> 'SchemaInfo'");
+            IEnumerable<Table> tables = LoadTableMetadata();
 
             foreach(var table in tables)
             {
-                Console.WriteLine(table.Name);
-
-                var columns =
-                    Db.Fetch<Column>("SELECT ObjectId = object_id, Name = name FROM sys.columns WHERE object_id = @0",
-                                     table.ObjectId);
-
-                foreach(var col in columns)
-                {
-                    Console.WriteLine("     {0}", col.Name);
-                }
+                Console.WriteLine("Table: {0}; timestamps: {1}", table.Name, table.UseTimestamps);
+                Console.WriteLine("    {0} columns", table.Columns.Count());
             }
+        }
+
+        private IEnumerable<Table> LoadTableMetadata()
+        {
+            var tables =
+                Db.Fetch<Table>("SELECT ObjectId= object_id, Name = name FROM sys.tables WHERE name <> 'SchemaInfo'");
+
+            foreach (var table in tables)
+            {
+                table.Columns = Db.Fetch<Column>("SELECT ObjectId = object_id, Name = name FROM sys.columns WHERE object_id = @0",
+                                                 table.ObjectId);
+            }
+
+            return tables;
         }
     }
 }
