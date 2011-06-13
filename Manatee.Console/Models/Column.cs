@@ -9,8 +9,14 @@ namespace Manatee.Command.Models
     {
         public string ObjectId { get; set; }
 
+        public int ColumnId { get; set; }
+
         public string Name { get; set; }
 
         public string Datatype { get; set; }
+
+        public bool IsNullable { get; set; }
+
+        public bool IsIdentity { get; set; }
     }
 }

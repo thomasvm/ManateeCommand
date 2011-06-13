@@ -46,5 +46,7 @@ namespace Manatee.Command.Models
                 return Columns.Where(x => !TimestampColumns.Contains(x.Name));
             }
         }
+
+        public IEnumerable<ForeignKey> ForeignKeys { get; set; }
     }
 }
