@@ -495,9 +495,10 @@ namespace Manatee
         /// </summary>
         private static IEnumerable<string> ReadMinds(dynamic migration)
         {
-            if (migration is IEnumerable)
+            if (migration is IEnumerable<object>)
             {
-                foreach (var item in migration.Reverse())
+                IEnumerable<object> list = (IEnumerable<object>)migration;
+                foreach (var item in list.Reverse())
                     yield return ReadSingleMind(item);
             }
             else
@@ -523,7 +524,7 @@ namespace Manatee
                 // DROP INDEX
                 return string.Format("DROP INDEX {0}.{1}", op.up.add_index.table_name, CreateIndexName(op.up.add_index));
             }
-            else if (op.add_foreign_key != null)
+            else if (op.foreign_key != null)
             {
                 return string.Format("ALTER TABLE [{0}] DROP CONSTRAINT [{1}]", op.foreign_key.from.table, op.foreign_key.name);
             }
