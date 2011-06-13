@@ -24,14 +24,5 @@
 				}
 			}
 		}
-	],
-	down: [
-		{ 
-			drop_constraint: {
-				table: "subcategories",
-				name: "fk_subcategories_to_categories"
-			}
-		},
-		{ drop_table: "subcategories" }
 	]
 }

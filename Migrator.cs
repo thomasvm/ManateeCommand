@@ -495,16 +495,19 @@ namespace Manatee
         /// </summary>
         private static IEnumerable<string> ReadMinds(dynamic migration)
         {
+            var commands = new List<string>();
+
             if (migration is IEnumerable<object>)
             {
                 IEnumerable<object> list = (IEnumerable<object>)migration;
                 foreach (var item in list.Reverse())
-                    yield return ReadSingleMind(item);
+                    commands.Add(ReadSingleMind(item));
             }
             else
             {
-                yield return ReadSingleMind(migration);
+                commands.Add(ReadSingleMind(migration));
             }
+            return commands;
         }
 
         private static string ReadSingleMind(dynamic op)
@@ -512,17 +515,17 @@ namespace Manatee
             //CREATE
             if (op.create_table != null)
             {
-                return string.Format("DROP TABLE [{0}]", op.up.create_table.name);
+                return string.Format("DROP TABLE [{0}]", op.create_table.name);
                 //DROP COLUMN
             }
             else if (op.add_column != null)
             {
-                return string.Format("ALTER TABLE [{0}] DROP COLUMN {1}", op.up.add_column, op.up.add_column.columns[0].name);
+                return string.Format("ALTER TABLE [{0}] DROP COLUMN {1}", op.add_column, op.add_column.columns[0].name);
             }
             else if (op.add_index != null)
             {
                 // DROP INDEX
-                return string.Format("DROP INDEX {0}.{1}", op.up.add_index.table_name, CreateIndexName(op.up.add_index));
+                return string.Format("DROP INDEX {0}.{1}", op.add_index.table_name, CreateIndexName(op.add_index));
             }
             else if (op.foreign_key != null)
             {
