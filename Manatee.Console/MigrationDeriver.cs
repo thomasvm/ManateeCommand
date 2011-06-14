@@ -59,6 +59,7 @@ namespace Manatee.Command
                                                            WHERE parent_object_id = @0", 
                                                            table.ObjectId);
 
+                // load all foreign key column at once
                 var foreignKeyColumns =
                     Db.Fetch<ForeignKeyColumn>(
                         @"SELECT ForeignKeyId = constraint_object_id, 
@@ -73,8 +74,8 @@ namespace Manatee.Command
                           AND    fkc.referenced_column_id = osc.column_id
                           WHERE  parent_object_id = @0",
                         table.ObjectId);
-
-
+                
+                // now split them over the several foreign keys
                 var grouped = foreignKeyColumns.GroupBy(x => x.ForeignKeyId, y => y);
                 foreach(var item in grouped)
                     table.ForeignKeys.Single(x => x.Id == item.Key).Columns = item.ToList();
