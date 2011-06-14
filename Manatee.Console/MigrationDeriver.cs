@@ -9,8 +9,6 @@ namespace Manatee.Command
 {
     public class MigrationDeriver
     {
-        
-
         protected Database Db { get; set; }
 
         protected string Folder { get; set; }
@@ -40,20 +38,26 @@ namespace Manatee.Command
         private IEnumerable<Table> LoadTableMetadata()
         {
             var tables =
-                Db.Fetch<Table>("SELECT ObjectId = object_id, Name = name FROM sys.tables WHERE name <> 'SchemaInfo'");
+                Db.Fetch<Table>("SELECT ObjectId = object_id, Name = name FROM sys.tables WHERE name NOT IN ('SchemaInfo', 'sysdiagrams') ORDER BY name");
 
             foreach (var table in tables)
             {
-                table.Columns = Db.Fetch<Column>(@"SELECT ObjectId = object_id, ColumnId = column_id, Name = name,
-                                                          IsNullable = is_nullable, IsIdentity = is_identity
-                                                   FROM sys.columns WHERE object_id = @0",
+                table.Columns = Db.Fetch<Column>(@"SELECT ObjectId = sc.object_id, ColumnId = sc.column_id, Name = sc.name,
+                                                          IsNullable = sc.is_nullable, IsIdentity = sc.is_identity, 
+                                                          DataType = st.name
+                                                   FROM   sys.columns sc 
+                                                   JOIN   sys.types st
+                                                   ON     sc.user_type_id = st.user_type_id
+                                                   WHERE  sc.object_id = @0
+                                                   ORDER BY sc.column_id",
                                                  table.ObjectId);
 
                 table.ForeignKeys = Db.Fetch<ForeignKey>(@"SELECT Id = object_id,
                                                                   Name = name, 
                                                                   ReferencedObjectName = OBJECT_NAME(referenced_object_id)
                                                            FROM sys.foreign_keys
-                                                           WHERE parent_object_id = @0", table.ObjectId);
+                                                           WHERE parent_object_id = @0", 
+                                                           table.ObjectId);
 
                 var foreignKeyColumns =
                     Db.Fetch<ForeignKeyColumn>(

@@ -18,5 +18,13 @@ namespace Manatee.Command.Models
         public bool IsNullable { get; set; }
 
         public bool IsIdentity { get; set; }
+
+        public bool IsPkCandidate 
+        { 
+            get 
+            {
+                return IsIdentity && Datatype == "int" && !IsNullable;
+            } 
+        }
     }
 }
