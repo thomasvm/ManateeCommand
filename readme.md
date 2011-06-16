@@ -1,10 +1,11 @@
 
 ManateeCommand
 ==============
-ManateeCommand is a different approach to idea that was originally pitched and implemented by Rob Conery as [Manatee][https://github.com/robconery/Manatee], a _Manatee is a single-file, drop-in database migrator for ASP.NET/WebMatrix using .NET 4.0_.  While this implementation can be very useful in WebMatrix projects, ManateeCommand takes another direction by providing the same functionality as _command-line database migrator_.
+ManateeCommand is a different approach to idea that was originally pitched and implemented by Rob Conery as [Manatee](https://github.com/robconery/Manatee), a _Manatee is a single-file, drop-in database migrator for ASP.NET/WebMatrix using .NET 4.0_.  While this implementation can be very useful in WebMatrix projects, ManateeCommand takes another direction by providing the same functionality as _command-line database migrator_.  This project started from his code.
 
 How Do You Use It?
 ------------------
+This section also comes from the original project
 ### Command line
 *To be extended*, but you can ask the exe for its options by doing
 
