@@ -9,8 +9,6 @@ namespace Manatee.Command
 {
     public class MigrationDeriver
     {
-        
-
         protected Database Db { get; set; }
 
         protected string Folder { get; set; }
@@ -69,8 +67,7 @@ namespace Manatee.Command
                           AND    fkc.referenced_column_id = osc.column_id
                           WHERE  parent_object_id = @0",
                         table.ObjectId);
-
-
+                
                 var grouped = foreignKeyColumns.GroupBy(x => x.ForeignKeyId, y => y);
                 foreach(var item in grouped)
                     table.ForeignKeys.Single(x => x.Id == item.Key).Columns = item.ToList();
