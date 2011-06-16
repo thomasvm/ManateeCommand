@@ -5,7 +5,7 @@ ManateeCommand is a different approach to idea that was originally pitched and i
 
 How Do You Use It?
 ------------------
-This section also comes from the original project
+This section mostly comes from the original project
 ### Command line
 *To be extended*, but you can ask the exe for its options by doing
 
@@ -178,6 +178,6 @@ If you declare the up or the down operation as an json array, then you all those
         ]
     }
 
-### Deriving from an exisitng data model
+### Deriving from an existing data model
 This is still very much _WIP_, but the intention is that one can ask ManateeCommand to create a set of migration files when provided an existing database.  This to speed up development against already established data models.
 
