@@ -158,23 +158,25 @@ To add foreign keys to you tables, you can use foreign\_key as the creation comm
     }
 
 ### Multiple up and down commands
-If you declare the up or the down operation as an json array, then you all those commands will be executed in sequence.  This is useful when you want to keep some operations together, or to minimize the amount of migration files needed when setting up an initial database model. Remember to that this is not encouraged (see above)
+If you declare the up or the down operation as an json array, then you all those commands will be executed in sequence.  This is useful when you want to keep some operations together, or to minimize the amount of migration files needed when setting up an initial database model. Remember to that this is not encouraged (see above) and looks less nice.
 
     {
         up: [
-           create_table: {
-                name: "products",
-                columns: [
-                    { name: "title", type: "string" },
-                    { name: "description", type: "string" },
-                    { name: "price", type: "money" }
-                ]
+            {
+                create_table: {
+                     name: "products",
+                     columns: [
+                         { name: "title", type: "string" },
+                         { name: "description", type: "string" },
+                         { name: "price", type: "money" }
+                     ]
+                 }
             },
-          execute: "INSERT INTO products(title, description, price) VALUES('Test', 'description', 20.0)"
+            {  execute: "INSERT INTO products(title, description, price) VALUES('Test', 'description', 20.0)" }
         ],
         down: [
-            execute: "DELETE FROM products where title = 'Test'",
-            drop_table: "products"
+            { execute: "DELETE FROM products where title = 'Test'" },
+            { drop_table: "products" }
         ]
     }
 
