@@ -15,6 +15,8 @@ namespace Manatee.Command.Models
 
         public string Datatype { get; set; }
 
+        public int Length { get; set; }
+
         public bool IsNullable { get; set; }
 
         public bool IsIdentity { get; set; }
@@ -25,6 +27,50 @@ namespace Manatee.Command.Models
             {
                 return IsIdentity && Datatype == "int" && !IsNullable;
             } 
+        }
+
+        private IList<string> DoubleDigitTypes = new List<string>() { "nvarchar", "nchar" };
+
+        private int GetLength()
+        {
+            if (Datatype == "nvarchar")
+                return Length/2;
+            return Length;
+        }
+
+        public string DeriveDatatype()
+        {
+            if (IsPkCandidate)
+                return "pk";
+
+            var datatype = Datatype;
+
+            switch(datatype)
+            {
+                case("nvarchar"):
+                case("varchar"):
+                    datatype = "string";
+                    if (GetLength() > 255 || GetLength() == -1)
+                        datatype = "text";
+                    break;
+                case("decimal"):
+                    datatype = "money";
+                    break;
+                case("bit"):
+                    datatype = "boolean";
+                    break;
+                case("datetime"):
+                    datatype = "date";
+                    break;
+                case("uniqueidentifier"):
+                    datatype = "guid";
+                    break;
+            }
+
+            if (IsNullable)
+                return datatype + " NULL";
+
+            return datatype;
         }
     }
 }

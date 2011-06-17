@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Mono.Options;
 
@@ -8,6 +10,25 @@ namespace Manatee.Command
 {
     public class Program
     {
+        static Program()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += Resolver;
+        }
+
+        static Assembly Resolver(object sender, ResolveEventArgs args)
+        {
+            var asName = new AssemblyName(args.Name);
+            if (!asName.Name.Equals("Newtonsoft.Json"))
+                return null;
+
+            Assembly a1 = Assembly.GetExecutingAssembly();
+            Stream s = a1.GetManifestResourceStream("Manatee.Command.Newtonsoft.Json.dll");
+            byte[] block = new byte[s.Length];
+            s.Read(block, 0, block.Length);
+            Assembly a2 = Assembly.Load(block);
+            return a2;
+        }
+
         public static void Main(string[] args)
         {
             var settings = new InputParameters();
@@ -17,7 +38,7 @@ namespace Manatee.Command
                 { "help|h", "Show Help", s => settings.ShowHelp = true }, 
                 { "command=|c=", "Command, possible values can be 'list', 'goto' or 'derive'. List is the default.", s => settings.ParseCommand(s) }, 
                 { "path=|p=", "Migrations path", s => settings.MigrationFolder = s }, 
-                { "force|f", "Force output", s=> settings.Force = true},
+                { "table=|t=", "Table to filter on when deriving", s => settings.Table = s }, 
                 { "con=", "Name of the connection", s => settings.Connection = s }, 
                 { "version=|v=", "Destination version, must be a number or 'last'", s => settings.GotoVersion(s) }, 
             };
@@ -45,6 +66,9 @@ namespace Manatee.Command
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+#if DEBUG
+                Console.WriteLine(e.StackTrace);
+#endif
             }
         }
 
@@ -52,8 +76,9 @@ namespace Manatee.Command
         {
             if(settings.Command == Command.Derive)
             {
-                var deriver = new MigrationDeriver(settings.MigrationFolder, settings.Connection);
+                var deriver = new MigrationDeriver(settings.MigrationFolder, settings.Connection, settings.Table);
                 deriver.DoDerive();
+                return;
             }
 
             var migrator = new Migrator(settings.MigrationFolder, settings.Connection);

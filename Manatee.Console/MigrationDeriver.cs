@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 using PetaPoco;
 using Manatee.Command.Models;
 using System.IO;
@@ -15,9 +16,9 @@ namespace Manatee.Command
 
         protected string Folder { get; set; }
 
-        protected bool Force { get; set; }
+        protected string Table { get; set; }
 
-        public MigrationDeriver(string pathToMigrationFiles = null, string connectionStringName = "", bool force = false)
+        public MigrationDeriver(string pathToMigrationFiles = null, string connectionStringName = "", string table = null)
         {
             Db = new Database(connectionStringName);
 
@@ -25,7 +26,7 @@ namespace Manatee.Command
                 pathToMigrationFiles = "DB";
 
             Folder = pathToMigrationFiles;
-            Force = force;
+            Table = table;
         }
 
         public void DoDerive()
@@ -34,44 +35,60 @@ namespace Manatee.Command
 
             if (!Directory.Exists(Folder))
                 throw new FileNotFoundException("Folder does not exist.", Folder);
-
-            bool canWipeFolder = Force;
-            var files = Directory.GetFiles(Folder);
-            if (!Force && files.Any())
-            {
-                Console.Write("The {0} folder is not empty? Do want to clear its contents? (y|n):", Folder);
-                canWipeFolder = Console.ReadLine() == "y";
-            }
             
             int nr = 0;
 
             foreach(var table in tables)
             {
-                string filename = string.Format("{0} - Create {1}.js", nr++.ToString().PadLeft(3, '0'), table.Name);
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHss");
+
+                string filename = string.Format("{2}_{0}_create_{1}.json", (++nr).ToString().PadLeft(3, '0'), table.Name, timestamp);
                 string fullPath = Path.Combine(Folder, filename);
+                
+                using(new ColorPrinter(ConsoleColor.Green))
+                    Console.WriteLine("Creating file: '{0}'", filename);
 
-                if (File.Exists(fullPath))
-                {
-                    if (canWipeFolder)
-                        throw new Exception(string.Format("File '{0}' already exists", fullPath));
+                dynamic up = new
+                                 {
+                                     create_table = new
+                                                        {
+                                                            name = table.Name,
+                                                            timestamps = table.UseTimestamps,
+                                                            columns = (from col in table.NonTimestampColumns
+                                                                       select new { name = col.Name, type = col.DeriveDatatype() }).ToArray()
+                                                        }
+                                 };
 
-                    File.Delete(fullPath);
-                }
+                dynamic down = new
+                                   {
+                                       drop_table= table.Name
+                                   };
 
-                Console.WriteLine("Creating file: '{0}'", fullPath);
+                dynamic migration = new ExpandoObject();
+                migration.up = up;
+                migration.down = down;
+                
+                string json = JsonConvert.SerializeObject(migration, Formatting.Indented);
+                File.WriteAllText(fullPath, json);
             }
+            
+            using(new ColorPrinter(ConsoleColor.Yellow))
+                Console.WriteLine("Written {0} files to folder '{1}'.", nr, Folder);
         }
 
         private IEnumerable<Table> LoadTableMetadata()
         {
             var tables =
-                Db.Fetch<Table>("SELECT ObjectId = object_id, Name = name FROM sys.tables WHERE name NOT IN ('SchemaInfo', 'sysdiagrams') ORDER BY name");
+                Db.Fetch<Table>("SELECT ObjectId = object_id, Name = name FROM sys.tables " +
+                                "WHERE name NOT IN ('SchemaInfo', 'sysdiagrams') " +
+                                "AND   (name = @0 OR @0 IS NULL)" +
+                                "ORDER BY name", Table);
 
             foreach (var table in tables)
             {
                 table.Columns = Db.Fetch<Column>(@"SELECT ObjectId = sc.object_id, ColumnId = sc.column_id, Name = sc.name,
                                                           IsNullable = sc.is_nullable, IsIdentity = sc.is_identity, 
-                                                          DataType = st.name
+                                                          DataType = st.name, Length = sc.max_length
                                                    FROM   sys.columns sc 
                                                    JOIN   sys.types st
                                                    ON     sc.user_type_id = st.user_type_id

@@ -18,6 +18,8 @@ namespace Manatee.Command
 
         public int? DesitinationVersion { get; private set; }
 
+        public string Table { get; set; }
+
         public bool ShowHelp { get; set; }
 
         public Command Command { get; set; }
@@ -42,8 +44,6 @@ namespace Manatee.Command
                 return true;
             }
         }
-
-        public bool Force { get; set; }
 
         public void GotoVersion(string version)
         {
