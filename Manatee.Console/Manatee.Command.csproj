@@ -49,6 +49,7 @@
     <Compile Include="..\Migrator.cs">
       <Link>Migrator.cs</Link>
     </Compile>
+    <Compile Include="ColorPrinter.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="InputParameters.cs" />
     <Compile Include="MigrationDeriver.cs" />

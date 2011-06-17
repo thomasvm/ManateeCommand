@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using PetaPoco;
 using Manatee.Command.Models;
+using System.IO;
 
 namespace Manatee.Command
 {
@@ -13,7 +15,9 @@ namespace Manatee.Command
 
         protected string Folder { get; set; }
 
-        public MigrationDeriver(string pathToMigrationFiles = null, string connectionStringName = "")
+        protected bool Force { get; set; }
+
+        public MigrationDeriver(string pathToMigrationFiles = null, string connectionStringName = "", bool force = false)
         {
             Db = new Database(connectionStringName);
 
@@ -21,17 +25,40 @@ namespace Manatee.Command
                 pathToMigrationFiles = "DB";
 
             Folder = pathToMigrationFiles;
+            Force = force;
         }
 
         public void DoDerive()
         {
             IEnumerable<Table> tables = LoadTableMetadata();
 
+            if (!Directory.Exists(Folder))
+                throw new FileNotFoundException("Folder does not exist.", Folder);
+
+            bool canWipeFolder = Force;
+            var files = Directory.GetFiles(Folder);
+            if (!Force && files.Any())
+            {
+                Console.Write("The {0} folder is not empty? Do want to clear its contents? (y|n):", Folder);
+                canWipeFolder = Console.ReadLine() == "y";
+            }
+            
+            int nr = 0;
+
             foreach(var table in tables)
             {
-                Console.WriteLine("Table: {0}; timestamps: {1}", table.Name, table.UseTimestamps);
-                Console.WriteLine("    {0} columns", table.Columns.Count());
-                Console.WriteLine("    {0} foreign keys", table.ForeignKeys.Count());
+                string filename = string.Format("{0} - Create {1}.js", nr++.ToString().PadLeft(3, '0'), table.Name);
+                string fullPath = Path.Combine(Folder, filename);
+
+                if (File.Exists(fullPath))
+                {
+                    if (canWipeFolder)
+                        throw new Exception(string.Format("File '{0}' already exists", fullPath));
+
+                    File.Delete(fullPath);
+                }
+
+                Console.WriteLine("Creating file: '{0}'", fullPath);
             }
         }
 

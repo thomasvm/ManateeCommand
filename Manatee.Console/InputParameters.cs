@@ -43,6 +43,8 @@ namespace Manatee.Command
             }
         }
 
+        public bool Force { get; set; }
+
         public void GotoVersion(string version)
         {
             if (version.Equals("last", StringComparison.InvariantCultureIgnoreCase))

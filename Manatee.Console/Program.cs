@@ -16,7 +16,8 @@ namespace Manatee.Command
             {
                 { "help|h", "Show Help", s => settings.ShowHelp = true }, 
                 { "command=|c=", "Command, possible values can be 'list', 'goto' or 'derive'. List is the default.", s => settings.ParseCommand(s) }, 
-                { "folder=|f=", "Migrations folder", s => settings.MigrationFolder = s }, 
+                { "path=|p=", "Migrations path", s => settings.MigrationFolder = s }, 
+                { "force|f", "Force output", s=> settings.Force = true},
                 { "con=", "Name of the connection", s => settings.Connection = s }, 
                 { "version=|v=", "Destination version, must be a number or 'last'", s => settings.GotoVersion(s) }, 
             };
