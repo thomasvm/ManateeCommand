@@ -198,6 +198,9 @@ namespace Manatee
                 //DOWN
                 for (int i = _currentVersion; i > to; i--)
                 {
+                    if (i - 1 >= Migrations.Values.Count())
+                        continue;
+
                     //get the migration and execute it
                     var migration = Migrations.Values.ElementAt(i - 1);
                     
