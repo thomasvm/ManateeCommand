@@ -10,6 +10,10 @@ using System.IO;
 
 namespace Manatee.Command
 {
+    /// <summary>
+    /// Intentionally everything in one file, this doesn't have to become
+    /// an enterprise level abstracted thing.
+    /// </summary>
     public class MigrationDeriver
     {
         protected Database Db { get; set; }
@@ -39,42 +43,84 @@ namespace Manatee.Command
             int nr = 0;
 
             foreach(var table in tables)
+                DeriveTableMigration(++nr, table);
+
+            foreach(var table in tables.Where(t => t.ForeignKeys.Any()))
             {
-                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHss");
-
-                string filename = string.Format("{2}_{0}_create_{1}.json", (++nr).ToString().PadLeft(3, '0'), table.Name, timestamp);
-                string fullPath = Path.Combine(Folder, filename);
-                
-                using(new ColorPrinter(ConsoleColor.Green))
-                    Console.WriteLine("Creating file: '{0}'", filename);
-
-                dynamic up = new
-                                 {
-                                     create_table = new
-                                                        {
-                                                            name = table.Name,
-                                                            timestamps = table.UseTimestamps,
-                                                            columns = (from col in table.NonTimestampColumns
-                                                                       select new { name = col.Name, type = col.DeriveDatatype() }).ToArray()
-                                                        }
-                                 };
-
-                dynamic down = new
-                                   {
-                                       drop_table= table.Name
-                                   };
-
-                dynamic migration = new ExpandoObject();
-                migration.up = up;
-                migration.down = down;
-                
-                string json = JsonConvert.SerializeObject(migration, Formatting.Indented);
-                File.WriteAllText(fullPath, json);
+                foreach(var fk in table.ForeignKeys)
+                    DeriveForeignKeyMigration(++nr, table, fk);
             }
-            
+
             using(new ColorPrinter(ConsoleColor.Yellow))
                 Console.WriteLine("Written {0} files to folder '{1}'.", nr, Folder);
         }
+
+        private void DeriveTableMigration(int nr, Table table)
+        {
+            string name = string.Format("create_{0}", table.Name);
+            var migration = CreateTableMigration(table);
+            WriteMigration(nr, name, migration);
+        }
+
+        private static object CreateTableMigration(Table table)
+        {
+            dynamic up = new
+                             {
+                                 create_table = new
+                                                    {
+                                                        name = table.Name,
+                                                        timestamps = table.UseTimestamps,
+                                                        columns = (from col in table.NonTimestampColumns
+                                                                   select new { name = col.Name, type = col.DeriveDatatype() }).ToArray()
+                                                    }
+                             };
+            dynamic down = new
+                               {
+                                   drop_table= table.Name
+                               };
+            var migration = new {up, down };
+            return migration;
+        }
+
+        private void DeriveForeignKeyMigration(int nr, Table table, ForeignKey fk)
+        {
+            var name = string.Format("create_{0}", fk.Name);
+            var migration = CreateForeignKeyMigration(table, fk);
+            WriteMigration(nr, name, migration);
+        }
+
+        private object CreateForeignKeyMigration(Table table, ForeignKey fk)
+        {
+            var up = new
+                         {
+                             foreign_key = new
+                                               {
+                                                   name = fk.Name,
+                                                   from = new
+                                                              {
+                                                                  table = table.Name,
+                                                                  columns = fk.Columns.Select(c => c.ColumnName).ToArray()
+                                                              },
+                                                   to = new
+                                                            {
+                                                                table = fk.ReferencedObjectName,
+                                                                columns = fk.Columns.Select(c => c.ReferencedColumnName).ToArray()
+                                                            }
+                                               }
+                         };
+            var down = new
+                           {
+                               drop_constraint= new
+                                                    {
+                                                        table = table.Name,
+                                                        name = fk.Name
+                                                    }
+                           };
+            var migration = new { up, down };
+            return migration;
+        }
+
+        #region Helpers
 
         private IEnumerable<Table> LoadTableMetadata()
         {
@@ -86,7 +132,9 @@ namespace Manatee.Command
 
             foreach (var table in tables)
             {
-                table.Columns = Db.Fetch<Column>(@"SELECT ObjectId = sc.object_id, ColumnId = sc.column_id, Name = sc.name,
+                table.Columns =
+                    Db.Fetch<Column>(
+                        @"SELECT ObjectId = sc.object_id, ColumnId = sc.column_id, Name = sc.name,
                                                           IsNullable = sc.is_nullable, IsIdentity = sc.is_identity, 
                                                           DataType = st.name, Length = sc.max_length
                                                    FROM   sys.columns sc 
@@ -94,14 +142,16 @@ namespace Manatee.Command
                                                    ON     sc.user_type_id = st.user_type_id
                                                    WHERE  sc.object_id = @0
                                                    ORDER BY sc.column_id",
-                                                 table.ObjectId);
+                        table.ObjectId);
 
-                table.ForeignKeys = Db.Fetch<ForeignKey>(@"SELECT Id = object_id,
+                table.ForeignKeys =
+                    Db.Fetch<ForeignKey>(
+                        @"SELECT Id = object_id,
                                                                   Name = name, 
                                                                   ReferencedObjectName = OBJECT_NAME(referenced_object_id)
                                                            FROM sys.foreign_keys
-                                                           WHERE parent_object_id = @0", 
-                                                           table.ObjectId);
+                                                           WHERE parent_object_id = @0",
+                        table.ObjectId);
 
                 // load all foreign key column at once
                 var foreignKeyColumns =
@@ -118,14 +168,30 @@ namespace Manatee.Command
                           AND    fkc.referenced_column_id = osc.column_id
                           WHERE  parent_object_id = @0",
                         table.ObjectId);
-                
+
                 // now split them over the several foreign keys
                 var grouped = foreignKeyColumns.GroupBy(x => x.ForeignKeyId, y => y);
-                foreach(var item in grouped)
+                foreach (var item in grouped)
                     table.ForeignKeys.Single(x => x.Id == item.Key).Columns = item.ToList();
             }
 
             return tables;
         }
+
+        private void WriteMigration(int nr, string name, dynamic migration)
+        {
+            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHss");
+
+            string filename = string.Format("{0}_{1}_{2}.json", timestamp, nr.ToString().PadLeft(3, '0'), name);
+            string fullPath = Path.Combine(Folder, filename);
+
+            using (new ColorPrinter(ConsoleColor.Green))
+                Console.WriteLine("Creating file: '{0}'", filename);
+
+            string json = JsonConvert.SerializeObject(migration, Formatting.Indented);
+            File.WriteAllText(fullPath, json);
+        }
+
+        #endregion
     }
 }
