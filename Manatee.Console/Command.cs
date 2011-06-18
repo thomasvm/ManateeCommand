@@ -9,6 +9,6 @@ namespace Manatee.Command
     {
         List,
         Goto,
-        Derive
+        Export
     }
 }

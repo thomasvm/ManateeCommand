@@ -14,7 +14,7 @@ namespace Manatee.Command
     /// Intentionally everything in one file, this doesn't have to become
     /// an enterprise level abstracted thing.
     /// </summary>
-    public class MigrationDeriver
+    public class MigrationExporter
     {
         protected Database Db { get; set; }
 
@@ -22,7 +22,7 @@ namespace Manatee.Command
 
         protected string Table { get; set; }
 
-        public MigrationDeriver(string pathToMigrationFiles = null, string connectionStringName = "", string table = null)
+        public MigrationExporter(string pathToMigrationFiles = null, string connectionStringName = "", string table = null)
         {
             Db = new Database(connectionStringName);
 
@@ -33,7 +33,7 @@ namespace Manatee.Command
             Table = table;
         }
 
-        public void DoDerive()
+        public void DoExport()
         {
             IEnumerable<Table> tables = LoadTableMetadata();
 
@@ -185,8 +185,9 @@ namespace Manatee.Command
             string filename = string.Format("{0}_{1}_{2}.json", timestamp, nr.ToString().PadLeft(3, '0'), name);
             string fullPath = Path.Combine(Folder, filename);
 
-            using (new ColorPrinter(ConsoleColor.Green))
-                Console.WriteLine("Creating file: '{0}'", filename);
+            using(ColorPrinter.Green)
+                Console.Write("    Creating file: ");
+            Console.WriteLine(filename);
 
             string json = JsonConvert.SerializeObject(migration, Formatting.Indented);
             File.WriteAllText(fullPath, json);

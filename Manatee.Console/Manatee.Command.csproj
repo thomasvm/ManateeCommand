@@ -56,7 +56,7 @@
     <Compile Include="ColorPrinter.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="InputParameters.cs" />
-    <Compile Include="MigrationDeriver.cs" />
+    <Compile Include="MigrationExporter.cs" />
     <Compile Include="Models\Column.cs" />
     <Compile Include="Models\ForeignKey.cs" />
     <Compile Include="Models\ForeignKeyColumn.cs" />
