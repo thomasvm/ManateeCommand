@@ -50,7 +50,7 @@ namespace Manatee.Command.Models
                 case("nvarchar"):
                 case("varchar"):
                     datatype = "string";
-                    if (GetLength() > 255 || GetLength() == -1)
+                    if (GetLength() > 255 || Length == -1)
                         datatype = "text";
                     break;
                 case("decimal"):
