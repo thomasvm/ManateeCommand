@@ -26,7 +26,7 @@ namespace Manatee.Command
 
         public static void Write(string format, params object[] args)
         {
-            Write(format, args);
+            Console.Write(format, args);
         }
     }
 }
