@@ -157,6 +157,24 @@ To add foreign keys to you tables, you can use foreign\_key as the creation comm
         }
     }
 
+### Defaults
+Columns can define default value constraints.
+
+       up: 
+       {
+           create_table: {
+                name: "products",
+                columns: [
+                    { name: "title", type: "string" },
+                    { name: "description", type: "string"
+                      default: {
+                        name: "DF_description",
+                        value: "'<description>'"
+                      } },
+                ]
+            }
+       }
+
 ### Multiple up and down commands
 If you declare the up or the down operation as an json array, then you all those commands will be executed in sequence.  This is useful when you want to keep some operations together, or to minimize the amount of migration files needed when setting up an initial database model. Remember to that this is not encouraged (see above) and looks less nice.
 
