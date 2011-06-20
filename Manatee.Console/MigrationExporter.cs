@@ -83,10 +83,18 @@ namespace Manatee.Command
 
         private static object CreateColumnDefinition(Column col)
         {
-            if (!col.IsNullable)
-                return new {name = col.Name, type = col.DeriveDatatype()};
+            dynamic jsonCol = new ExpandoObject();
 
-            return new {name = col.Name, type = col.DeriveDatatype(), nullable = true };
+            jsonCol.name = col.Name;
+            jsonCol.type = col.DeriveDatatype();
+
+            if (col.IsNullable)
+                jsonCol.nullable = true;
+
+            if (!string.IsNullOrEmpty(col.DefaultName))
+                jsonCol.@default = new {name = col.DefaultName, value = col.DefaultValue};
+
+            return jsonCol;
         }
 
         private void DeriveForeignKeyMigration(int nr, Table table, ForeignKey fk)
@@ -143,10 +151,13 @@ namespace Manatee.Command
                     Db.Fetch<Column>(
                         @"SELECT ObjectId = sc.object_id, ColumnId = sc.column_id, Name = sc.name,
                                                           IsNullable = sc.is_nullable, IsIdentity = sc.is_identity, 
-                                                          DataType = st.name, Length = sc.max_length
+                                                          DataType = st.name, Length = sc.max_length,
+                                                          DefaultName = OBJECT_NAME(sc.default_object_id), DefaultValue = scom.text
                                                    FROM   sys.columns sc 
                                                    JOIN   sys.types st
                                                    ON     sc.user_type_id = st.user_type_id
+                                                   LEFT JOIN syscomments scom
+                                                   ON     sc.default_object_id = scom.id
                                                    WHERE  sc.object_id = @0
                                                    ORDER BY sc.column_id",
                         table.ObjectId);

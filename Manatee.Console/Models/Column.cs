@@ -21,6 +21,9 @@ namespace Manatee.Command.Models
 
         public bool IsIdentity { get; set; }
 
+        public string DefaultName { get; set; }
+        public string DefaultValue { get; set; }
+
         public bool IsPkCandidate 
         { 
             get 
