@@ -6,7 +6,7 @@
 				timestamps: false,
 				columns: [
 					{ name: "subcategoryid", type: "pk" },
-					{ name: "name", type: "string" },				
+					{ name: "name", type: "string", default: { name: "DF_name", value: "''" } },				
 					{ name: "categoryid", type: "int" }				
 				]
 			}
