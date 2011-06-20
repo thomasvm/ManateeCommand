@@ -8,6 +8,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Web.Script.Serialization;
+using Manatee.Command;
 
 namespace Manatee
 {
@@ -183,6 +184,9 @@ namespace Manatee
                 //UP
                 for (int i = _currentVersion; i < to; i++)
                 {
+                    var key = Migrations.Keys.ElementAt(i);
+                    Logger.WriteLine("    {0}", key);
+
                     //grab the next version - we start the loop with the current
                     var migration = Migrations.Values.ElementAt(i);
 
@@ -200,6 +204,10 @@ namespace Manatee
                 {
                     if (i - 1 >= Migrations.Values.Count())
                         continue;
+
+                    var key = Migrations.Keys.ElementAt(i - 1);
+                    Logger.WriteLine(ConsoleColor.Green, "     {0}:", i - 1);
+                    Logger.WriteLine("{0}", key);
 
                     //get the migration and execute it
                     var migration = Migrations.Values.ElementAt(i - 1);
@@ -228,6 +236,9 @@ namespace Manatee
         /// </summary>
         private static string SetColumnType(string colType)
         {
+            if (colType.Equals("ntext", StringComparison.InvariantCultureIgnoreCase))
+                return colType;
+
             return colType.Replace("pk", "int PRIMARY KEY IDENTITY(1,1)")
                 .Replace("money", "decimal(8,2)")
                 .Replace("date", "datetime")

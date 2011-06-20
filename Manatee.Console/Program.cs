@@ -30,7 +30,7 @@ namespace Manatee.Command
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Logger.WriteLine(ConsoleColor.Red, e.Message);
                 settings.ShowHelp = true;
             }
 
@@ -46,10 +46,9 @@ namespace Manatee.Command
             }
             catch (Exception e)
             {
-                using(ColorPrinter.Red)
-                    Console.WriteLine("Command failed: {0}", e.Message);
+                Logger.WriteLine(ConsoleColor.Red, "Command failed: {0}", e.Message);
 #if DEBUG
-                Console.WriteLine(e.StackTrace);
+                Logger.WriteLine(e.StackTrace);
 #endif
             }
         }
@@ -59,8 +58,7 @@ namespace Manatee.Command
             // Export
             if(settings.Command == Command.Export)
             {
-                using (ColorPrinter.Green)
-                    Console.WriteLine("Exporting migrations from connection {0}", settings.Connection);
+                Logger.WriteLine(ConsoleColor.Green, "Exporting migrations from connection {0}", settings.Connection);
 
                 var deriver = new MigrationExporter(settings.MigrationFolder, settings.Connection, settings.Table);
                 deriver.DoExport();
@@ -72,29 +70,32 @@ namespace Manatee.Command
             // List
             if(settings.Command == Command.List)
             {
-                using(ColorPrinter.Green)
-                    Console.WriteLine("Listing migrations from Folder {0} and connection {1}", settings.MigrationFolder, settings.Connection);
-
-                Console.WriteLine("     Current Version: {0}", migrator.CurrentVersion);
+                Logger.WriteLine(ConsoleColor.Green, "Listing migrations from Folder {0} and connection {1}", settings.MigrationFolder, settings.Connection);
+                Logger.WriteLine("    Current Version: {0}", migrator.CurrentVersion);
                 int counter = 0;
                 foreach(var migration in migrator.Migrations)
-                    Console.WriteLine("     {0}: {1}", ++counter, migration.Key);
+                {
+                    counter++;
+                    var msg = string.Format("    {0}: {1}", counter, migration.Key);
+                    if (counter == migrator.CurrentVersion)
+                        Logger.WriteLine(ConsoleColor.Green, msg);
+                    else 
+                        Logger.WriteLine("    {0}: {1}", counter, migration.Key);
+                }
                 return;
             }
 
             // Execute
             if(settings.Command == Command.Goto)
             {
-                using (ColorPrinter.Green)
-                    Console.WriteLine("Executing migrations from Folder {0} and connection {1}", settings.MigrationFolder, settings.Connection);
+                Logger.WriteLine(ConsoleColor.Green, "Executing migrations from Folder {0} and connection {1}", settings.MigrationFolder, settings.Connection);
 
                 var destinationVersion = settings.DesitinationVersion ?? migrator.Migrations.Count;
-                Console.WriteLine("     Current Version: {0}", migrator.CurrentVersion);
-                Console.WriteLine("     Going to Version: {0}", destinationVersion);
+                Logger.WriteLine("    Current Version: {0}", migrator.CurrentVersion);
+                Logger.WriteLine("    Going to Version: {0}", destinationVersion);
 
                 migrator.Migrate(destinationVersion);
-                using(ColorPrinter.Yellow)
-                    Console.WriteLine("Migrations successful");
+                Logger.WriteLine(ConsoleColor.Yellow, "Migrations successful");
             }
         }
 

@@ -51,8 +51,7 @@ namespace Manatee.Command
                     DeriveForeignKeyMigration(++nr, table, fk);
             }
 
-            using(new ColorPrinter(ConsoleColor.Yellow))
-                Console.WriteLine("Written {0} files to folder '{1}'.", nr, Folder);
+            Logger.WriteLine(ConsoleColor.Yellow, "Written {0} files to folder '{1}'.", nr, Folder);
         }
 
         private void DeriveTableMigration(int nr, Table table)
@@ -71,7 +70,7 @@ namespace Manatee.Command
                                                         name = table.Name,
                                                         timestamps = table.UseTimestamps,
                                                         columns = (from col in table.NonTimestampColumns
-                                                                   select new { name = col.Name, type = col.DeriveDatatype() }).ToArray()
+                                                                   select CreateColumnDefinition(col)).ToArray()
                                                     }
                              };
             dynamic down = new
@@ -80,6 +79,14 @@ namespace Manatee.Command
                                };
             var migration = new {up, down };
             return migration;
+        }
+
+        private static object CreateColumnDefinition(Column col)
+        {
+            if (!col.IsNullable)
+                return new {name = col.Name, type = col.DeriveDatatype()};
+
+            return new {name = col.Name, type = col.DeriveDatatype(), nullable = true };
         }
 
         private void DeriveForeignKeyMigration(int nr, Table table, ForeignKey fk)
@@ -185,9 +192,8 @@ namespace Manatee.Command
             string filename = string.Format("{0}_{1}_{2}.json", timestamp, nr.ToString().PadLeft(3, '0'), name);
             string fullPath = Path.Combine(Folder, filename);
 
-            using(ColorPrinter.Green)
-                Console.Write("    Creating file: ");
-            Console.WriteLine(filename);
+            Logger.Write(ConsoleColor.Green, "    Creating file: ");
+            Logger.WriteLine(filename);
 
             string json = JsonConvert.SerializeObject(migration, Formatting.Indented);
             File.WriteAllText(fullPath, json);

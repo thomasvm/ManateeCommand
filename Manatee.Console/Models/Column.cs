@@ -67,9 +67,6 @@ namespace Manatee.Command.Models
                     break;
             }
 
-            if (IsNullable)
-                return datatype + " NULL";
-
             return datatype;
         }
     }
