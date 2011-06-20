@@ -185,7 +185,8 @@ namespace Manatee
                 for (int i = _currentVersion; i < to; i++)
                 {
                     var key = Migrations.Keys.ElementAt(i);
-                    Logger.WriteLine("    {0}", key);
+                    Logger.Write(ConsoleColor.Green, "     {0}: ", i + 1);
+                    Logger.WriteLine("{0}", key);
 
                     //grab the next version - we start the loop with the current
                     var migration = Migrations.Values.ElementAt(i);
@@ -206,7 +207,7 @@ namespace Manatee
                         continue;
 
                     var key = Migrations.Keys.ElementAt(i - 1);
-                    Logger.WriteLine(ConsoleColor.Green, "     {0}:", i - 1);
+                    Logger.Write(ConsoleColor.Green, "     {0}: ", i);
                     Logger.WriteLine("{0}", key);
 
                     //get the migration and execute it

@@ -91,6 +91,7 @@ namespace Manatee.Command
                 Logger.WriteLine(ConsoleColor.Green, "Executing migrations from Folder {0} and connection {1}", settings.MigrationFolder, settings.Connection);
 
                 var destinationVersion = settings.DesitinationVersion ?? migrator.Migrations.Count;
+                destinationVersion = Math.Min(destinationVersion, migrator.Migrations.Count);
                 Logger.WriteLine("    Current Version: {0}", migrator.CurrentVersion);
                 Logger.WriteLine("    Going to Version: {0}", destinationVersion);
 
