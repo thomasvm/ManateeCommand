@@ -284,6 +284,13 @@ namespace Manatee
                     }
                 }
 
+                // Default constraint
+                if (col.@default != null)
+                {
+                    sb.Append(" CONSTRAINT " + col.@default.name);
+                    sb.Append(" DEFAULT " + col.@default.value);
+                }
+
                 counter++;
                 //this format will indent the column
                 if (counter < columns.Count)
