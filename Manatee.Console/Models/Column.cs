@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -31,8 +30,6 @@ namespace Manatee.Command.Models
                 return IsIdentity && Datatype == "int" && !IsNullable;
             } 
         }
-
-        private IList<string> DoubleDigitTypes = new List<string>() { "nvarchar", "nchar" };
 
         private int GetLength()
         {
