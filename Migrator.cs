@@ -160,6 +160,7 @@ namespace Manatee
 
         private int _currentVersion;
         private Database _db;
+        private string _migrationsFolder;
 
         public Migrator(string pathToMigrationFiles, string connectionStringName = "")
         {
@@ -168,6 +169,7 @@ namespace Manatee
             EnsureSchema(_db);
 
             _currentVersion = (int)_db.QueryValue("SELECT Version from SchemaInfo");
+            _migrationsFolder = pathToMigrationFiles;
         }
 
         public IDictionary<string, dynamic> Migrations { get; private set; }
@@ -341,7 +343,7 @@ namespace Manatee
             return sb.ToString();
         }
 
-        private static IEnumerable<string> GetCommands(dynamic op)
+        private IEnumerable<string> GetCommands(dynamic op)
         {
             if (op is IEnumerable)
             {
@@ -358,7 +360,7 @@ namespace Manatee
         /// This is the main "builder" of the DDL SQL and it's tuned for SQL CE. 
         /// The idea is that you build your app using SQL CE, then upgrade it to SQL Server when you need to
         /// </summary>
-        private static string GetCommand(dynamic op)
+        private string GetCommand(dynamic op)
         {
             //the "op" here is an "up" or a "down". It's dynamic as that's what the JSON parser
             //will return. The neat thing about this parser is that the dynamic result will
@@ -466,6 +468,11 @@ namespace Manatee
             {
                 result = op.execute;
             }
+            else if (op.execute_file != null)
+            {
+                var path = Path.Combine(_migrationsFolder, op.execute_file);
+                result = File.ReadAllText(path);
+            }
 
             return result;
         }
@@ -484,6 +491,9 @@ namespace Manatee
             var files = migrationDir.GetFiles();
             foreach (var file in files)
             {
+                if (!IsValidExtension(file.Extension))
+                    continue;
+
                 using (var t = new StreamReader(file.FullName))
                 {
                     var bits = t.ReadToEnd();
@@ -496,6 +506,18 @@ namespace Manatee
                 }
             }
             return result;
+        }
+
+        private static readonly string[] Extensions = new []{".js", ".json"};
+        
+
+        private static bool IsValidExtension(string value)
+        {
+            var qry = from extension in Extensions
+                      where extension.Equals(value, StringComparison.InvariantCultureIgnoreCase)
+                      select extension;
+
+            return qry.Any();
         }
 
         /// <summary>
