@@ -1,0 +1,8 @@
+﻿{
+	up: {
+		execute_file: "005 - Create Category.sql"
+	},
+	down: {
+		execute_file: "005 - Drop Category.sql"
+	}
+}

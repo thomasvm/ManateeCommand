@@ -54,6 +54,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="DB\005 - Drop Category.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DB\005 - Create Category.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="app.config" />
     <Content Include="DB\001 - Create Categories.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -65,6 +71,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="DB\004 - CreateSubCategories.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DB\005 - Create Category.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
