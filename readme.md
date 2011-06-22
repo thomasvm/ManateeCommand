@@ -198,6 +198,18 @@ If you declare the up or the down operation as an json array, then you all those
         ]
     }
 
+### Execute\_file
+The sql that needs to be executed can also be specified in a file outside the migration definition. This is useful when the sql to execute is becoming to big to simply include in the migration. It also has the benefit that one can write the sql in his preferred editor. ManateeCommand will look for the files in the same folder as the migrations
+
+    {
+        up: {
+            execute_file: "20110622_populate_pages.sql"
+        },
+        down: {
+            execute: "DELETE FROM pages WHERE ModifiedBy = 'script'"
+        }
+    }
+
 ### Deriving from an existing data model
 This is still very much _WIP_, but the intention is that one can ask ManateeCommand to create a set of migration files when provided an existing database.  This to speed up development against already established data models.
 
