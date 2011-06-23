@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
@@ -206,8 +207,25 @@ namespace Manatee.Command
             Logger.Write(ConsoleColor.Green, "    Creating file: ");
             Logger.WriteLine(filename);
 
-            string json = JsonConvert.SerializeObject(migration, Formatting.Indented);
+            string json = Serialize(migration);
             File.WriteAllText(fullPath, json);
+        }
+
+        private string Serialize(dynamic value)
+        {
+            JsonSerializer jsonSerializer = JsonSerializer.Create(null);
+
+            StringBuilder sb = new StringBuilder(128);
+            StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture);
+            using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
+            {
+                jsonWriter.Formatting = Formatting.Indented;
+                jsonWriter.QuoteName = false;
+
+                jsonSerializer.Serialize(jsonWriter, value);
+            }
+
+            return sw.ToString();
         }
 
         #endregion
