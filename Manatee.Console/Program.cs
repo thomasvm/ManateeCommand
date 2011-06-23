@@ -76,8 +76,9 @@ namespace Manatee.Command
                 foreach(var migration in migrator.Migrations)
                 {
                     counter++;
-                    var msg = string.Format("    {0}: {1}", counter, migration.Key);
-                    if (counter == migrator.CurrentVersion)
+                    bool isCurrent = migrator.CurrentVersion == counter;
+                    var msg = string.Format("    {0}: {1}{2}", counter, migration.Key, isCurrent ? " (current)" : string.Empty);
+                    if (isCurrent)
                         Logger.WriteLine(ConsoleColor.Green, msg);
                     else 
                         Logger.WriteLine("    {0}: {1}", counter, migration.Key);
