@@ -50,9 +50,12 @@ namespace Manatee.Command.Models
                 case("nvarchar"):
                 case("varchar"):
                     datatype = "string";
-                    if (GetLength() > 255 || Length == -1)
-                        datatype = "text";
-                    break;
+                    if (Length == -1)
+                        return "text";
+                    if (GetLength() == 255)
+                        return "string";
+
+                    return string.Format("{0}({1})", datatype, GetLength());
                 case("decimal"):
                     datatype = "money";
                     break;
