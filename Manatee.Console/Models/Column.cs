@@ -49,7 +49,6 @@ namespace Manatee.Command.Models
             {
                 case("nvarchar"):
                 case("varchar"):
-                    datatype = "string";
                     if (Length == -1)
                         return "text";
                     if (GetLength() == 255)
