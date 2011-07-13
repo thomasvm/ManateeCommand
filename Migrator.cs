@@ -283,7 +283,7 @@ namespace Manatee
                     }
                     else
                     {
-                        sb.Append(" NOT NULL ");
+                        sb.Append(" NULL ");
                     }
                 }
 
