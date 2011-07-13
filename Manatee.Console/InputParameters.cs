@@ -24,6 +24,8 @@ namespace Manatee.Command
 
         public Command Command { get; set; }
 
+        public string Name { get; set; }
+
         protected bool CommandSet { get; set; }
 
         public InputParameters()
@@ -38,15 +40,21 @@ namespace Manatee.Command
                 if (!CommandSet)
                     return false;
 
+                if (Command == Command.Gen)
+                    return !string.IsNullOrEmpty(Name);
+
                 if (string.IsNullOrEmpty(Connection))
                     return false;
-
+                
                 return true;
             }
         }
 
         public void GotoVersion(string version)
         {
+            if (string.IsNullOrEmpty(version))
+                return;
+
             if (version.Equals("last", StringComparison.InvariantCultureIgnoreCase))
             {
                 DesitinationVersion = null;

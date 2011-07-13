@@ -17,11 +17,12 @@ namespace Manatee.Command
             var options = new OptionSet
             {
                 { "help|h", "Show Help", s => settings.ShowHelp = true }, 
-                { "command=|c=", "Command, possible values can be 'list', 'goto' or 'export'. List is the default.", s => settings.ParseCommand(s) }, 
+                { "command=|c=", "Command, possible values can be 'list', 'goto', 'gen' or 'export'. List is the default.", s => settings.ParseCommand(s) }, 
                 { "path=|p=", "Migrations path", s => settings.MigrationFolder = s }, 
                 { "table=|t=", "Table to filter on when deriving", s => settings.Table = s }, 
                 { "con=", "Name of the connection", s => settings.Connection = s }, 
                 { "version=|v=|to=", "Destination version, must be a number or 'last'", s => settings.GotoVersion(s) }, 
+                { "name=|n=", "Only taken into account when command is 'gen'. Name of the new migration", s => settings.Name = s }, 
             };
 
             try
@@ -62,6 +63,26 @@ namespace Manatee.Command
 
                 var deriver = new MigrationExporter(settings.MigrationFolder, settings.Connection, settings.Table);
                 deriver.DoExport();
+                return;
+            }
+
+            // Generate
+            if (settings.Command == Command.Gen)
+            {
+                Logger.WriteLine(ConsoleColor.Green, "Generating new migration file");
+
+                var fileName = string.Format("{0}_{1}.json", DateTime.Now.ToString("yyyyMMdd_HHmm"), settings.Name);
+                var content = @"{
+    up: {
+     
+    },
+    down: {
+    }
+}";
+                var outputPath = Path.Combine(settings.MigrationFolder, fileName);
+                File.WriteAllText(outputPath, content, Encoding.UTF8);
+
+                Logger.WriteLine("Generated new file: {0}", fileName);
                 return;
             }
 
