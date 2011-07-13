@@ -9,6 +9,7 @@ namespace Manatee.Command
     {
         List,
         Goto,
-        Export
+        Export,
+        Gen
     }
 }
