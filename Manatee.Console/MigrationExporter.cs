@@ -214,7 +214,7 @@ namespace Manatee.Command
         private string Serialize(dynamic value)
         {
             JsonSerializer jsonSerializer = JsonSerializer.Create(null);
-
+            
             StringBuilder sb = new StringBuilder(128);
             StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture);
             using (JsonTextWriter jsonWriter = new JsonTextWriter(sw))
