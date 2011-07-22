@@ -210,6 +210,18 @@ The sql that needs to be executed can also be specified in a file outside the mi
         }
     }
 
+### Execute arrays
+Json doesn't support multi-line strings.  Sometimes a sql statement can easily fit on a single line, sometimes  a sql statement is so big that you'd rather have in a separate file. But there's also a set of statements that are just a couple of lines, so creating a separate file involves too much friction.  In this scenario you can use execute _arrays_.
+
+    {
+        up: {
+            execute: [
+                "DELETE FROM pages ",
+                "WHERE ModifiedBy = 'script'"
+            ]
+        }
+    }
+
 ### Deriving from an existing data model
 This is still very much _WIP_, but the intention is that one can ask ManateeCommand to create a set of migration files when provided an existing database.  This to speed up development against already established data models.
 
