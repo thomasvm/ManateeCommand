@@ -7,6 +7,7 @@ using System.Data.Common;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web.Script.Serialization;
 using Manatee.Command;
 
@@ -162,6 +163,13 @@ namespace Manatee
         private Database _db;
         private string _migrationsFolder;
 
+        /// <summary>
+        /// For testing purposes only
+        /// </summary>
+        public Migrator()
+        {
+        }
+
         public Migrator(string pathToMigrationFiles, string connectionStringName = "")
         {
             _db = new Database(connectionStringName);
@@ -283,7 +291,7 @@ namespace Manatee
                     }
                     else
                     {
-                        sb.Append(" NOT NULL ");
+                        sb.Append(" NULL ");
                     }
                 }
 
@@ -357,10 +365,19 @@ namespace Manatee
         }
 
         /// <summary>
+        /// For testing only
+        /// </summary>
+        public string GetCommandFromJson(string json)
+        {
+            dynamic decoded = Json.Decode(json);
+            return GetCommand(decoded);
+        }
+
+        /// <summary>
         /// This is the main "builder" of the DDL SQL and it's tuned for SQL CE. 
         /// The idea is that you build your app using SQL CE, then upgrade it to SQL Server when you need to
         /// </summary>
-        private string GetCommand(dynamic op)
+        public string GetCommand(dynamic op)
         {
             //the "op" here is an "up" or a "down". It's dynamic as that's what the JSON parser
             //will return. The neat thing about this parser is that the dynamic result will
@@ -466,7 +483,18 @@ namespace Manatee
             }
             else if (op.execute != null)
             {
-                result = op.execute;
+                if (op.execute is List<object>)
+                {
+                    var builder = new StringBuilder();
+                    foreach (var item in (List<object>)op.execute)
+                        builder.AppendLine(item.ToString());
+
+                    result = builder.ToString();
+                }
+                else
+                {
+                    result = op.execute;
+                }
             }
             else if (op.execute_file != null)
             {

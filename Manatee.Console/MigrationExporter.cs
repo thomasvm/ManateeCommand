@@ -103,8 +103,8 @@ namespace Manatee.Command
             jsonCol.name = col.Name;
             jsonCol.type = col.DeriveDatatype();
 
-            if (col.IsNullable)
-                jsonCol.nullable = true;
+            if (!col.IsNullable)
+                jsonCol.nullable = false;
 
             if (!string.IsNullOrEmpty(col.DefaultName))
                 jsonCol.@default = new {name = col.DefaultName, value = col.DefaultValue};
