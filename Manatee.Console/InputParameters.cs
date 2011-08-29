@@ -30,7 +30,7 @@ namespace Manatee.Command
 
         public InputParameters()
         {
-            MigrationFolder = "DB";
+            MigrationFolder = "migrations";
         }
 
         public bool IsValid
