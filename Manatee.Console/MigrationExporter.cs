@@ -46,11 +46,25 @@ namespace Manatee.Command
             foreach(var table in tables)
                 DeriveTableMigration(++nr, table);
 
+            var fkMigration =  new
+                                    {
+                                        up = new List<object>(),
+                                        down = new List<object>()
+                                    };
+
             foreach(var table in tables.Where(t => t.ForeignKeys.Any()))
             {
                 foreach(var fk in table.ForeignKeys)
-                    DeriveForeignKeyMigration(++nr, table, fk);
+                {
+                    dynamic standalone = CreateForeignKeyMigration(table, fk);
+
+                    fkMigration.up.Add(standalone.up);
+                    fkMigration.down.Add(standalone.down);
+                }
             }
+            
+            if (fkMigration.up.Any())
+                WriteMigration(++nr, "create foreign keys", fkMigration);
 
             Logger.WriteLine(ConsoleColor.Yellow, "Written {0} files to folder '{1}'.", nr, Folder);
         }
@@ -96,13 +110,6 @@ namespace Manatee.Command
                 jsonCol.@default = new {name = col.DefaultName, value = col.DefaultValue};
 
             return jsonCol;
-        }
-
-        private void DeriveForeignKeyMigration(int nr, Table table, ForeignKey fk)
-        {
-            var name = string.Format("create_{0}", fk.Name);
-            var migration = CreateForeignKeyMigration(table, fk);
-            WriteMigration(nr, name, migration);
         }
 
         private object CreateForeignKeyMigration(Table table, ForeignKey fk)
