@@ -64,26 +64,26 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DB\005 - Drop Category.sql">
+    <Content Include="migrations\005 - Drop Category.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="DB\005 - Create Category.sql">
+    <Content Include="migrations\005 - Create Category.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="app.config" />
-    <Content Include="DB\001 - Create Categories.json">
+    <Content Include="migrations\001 - Create Categories.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="DB\002 - Create Pages.json">
+    <Content Include="migrations\002 - Create Pages.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="DB\003 - Add Page Foreign Key.json">
+    <Content Include="migrations\003 - Add Page Foreign Key.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="DB\004 - CreateSubCategories.json">
+    <Content Include="migrations\004 - CreateSubCategories.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="DB\005 - Create Category.json">
+    <Content Include="migrations\005 - Create Category.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
