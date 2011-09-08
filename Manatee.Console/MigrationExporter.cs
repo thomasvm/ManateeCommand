@@ -206,7 +206,7 @@ namespace Manatee.Command
 
         private void WriteMigration(int nr, string name, dynamic migration)
         {
-            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHss");
+            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmm");
 
             string filename = string.Format("{0}_{1}_{2}.json", timestamp, nr.ToString().PadLeft(3, '0'), name);
             string fullPath = Path.Combine(Folder, filename);
