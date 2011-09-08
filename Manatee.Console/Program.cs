@@ -112,13 +112,27 @@ namespace Manatee.Command
             {
                 Logger.WriteLine(ConsoleColor.Green, "Executing migrations from Folder {0} and connection {1}", settings.MigrationFolder, settings.Connection);
 
-                var destinationVersion = settings.DesitinationVersion ?? migrator.Migrations.Count;
+                var destinationVersion = DetermineVersion(settings, migrator);
                 destinationVersion = Math.Min(destinationVersion, migrator.Migrations.Count);
                 Logger.WriteLine("    Current Version: {0}", migrator.CurrentVersion);
                 Logger.WriteLine("    Going to Version: {0}", destinationVersion);
 
                 migrator.Migrate(destinationVersion);
                 Logger.WriteLine(ConsoleColor.Yellow, "Migrations successful");
+            }
+        }
+
+        static int DetermineVersion(InputParameters parameters, Migrator m)
+        {
+            switch(parameters.GotoMode)
+            {
+                default:
+                case GotoMode.Specific:
+                    return parameters.DesitinationVersion.GetValueOrDefault(0);
+                case GotoMode.Previous:
+                    return Math.Max(m.Migrations.Count - 1, 0);
+                case GotoMode.Last:
+                    return m.Migrations.Count;
             }
         }
 

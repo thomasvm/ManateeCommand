@@ -5,16 +5,20 @@ using System.Text;
 
 namespace Manatee.Command
 {
+    public enum GotoMode
+    {
+        Specific,
+        Previous,
+        Last
+    }
+
     public class InputParameters
     {
         public string Connection { get; set; }
 
         public string MigrationFolder { get; set; }
 
-        public bool GotoLast 
-        { 
-            get { return DesitinationVersion.HasValue; }
-        }
+        public GotoMode GotoMode { get; private set; }
 
         public int? DesitinationVersion { get; private set; }
 
@@ -55,10 +59,20 @@ namespace Manatee.Command
             if (string.IsNullOrEmpty(version))
                 return;
 
-            if (version.Equals("last", StringComparison.InvariantCultureIgnoreCase))
+            // handle special cases
+            var specials = new[]
+                               {
+                                   new {Key = "last", Mode = GotoMode.Last },
+                                   new {Key = "previous", Mode = GotoMode.Previous },
+                               };
+
+            foreach(var item in specials)
             {
-                DesitinationVersion = null;
-                return;
+                if (version.Equals(item.Key, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    GotoMode = item.Mode;
+                    return;
+                }
             }
 
             int versionNumber;
@@ -67,6 +81,7 @@ namespace Manatee.Command
             if (!success)
                 throw new ArgumentException("Unsupported version definition", "version");
 
+            GotoMode = GotoMode.Specific;
             DesitinationVersion = versionNumber;
         }
 
